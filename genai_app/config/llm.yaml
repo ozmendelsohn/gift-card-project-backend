@@ -1,0 +1,4 @@
+ollama_phi:
+  type: "ollama"
+  langchain_config: 
+    model: "phi"
