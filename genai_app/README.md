@@ -10,7 +10,7 @@ The backend will support a three-screen web application with multiple API calls 
 - Install Python 3.10+.
 - Set up a virtual environment.
 - Install dependencies with poerty: `poetry install`.
-- Run the development server: `poetry run uvicorn main:app --reload`.
+- Run the development server: `poetry run uvicorn src.api:app --reload`.
 
 ## API Endpoints
 
