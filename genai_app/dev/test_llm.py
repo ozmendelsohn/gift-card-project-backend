@@ -13,5 +13,6 @@ CardTypeLabeler().label_card_type('')
 card_type = CardTypeLabeler().label_card_type('')
 questions = QuestionRetriver().retrieve_questions(card_type)
 llm_config = yaml.safe_load(open(os.path.join(CONFIG_PATH, 'llm.yaml')))
-questions_answers_generator = QuestionAnswerGenerator(llm_config['ollama_phi'])
-questions_answers_generator.generate_answers(questions=questions, recipient_info=recipient_info)
+questions_answers_generator = QuestionAnswerGenerator(llm_config['ollama_mistral'])
+questions_answers = questions_answers_generator.generate_answers(questions=questions, recipient_info=recipient_info)
+questions_answers
