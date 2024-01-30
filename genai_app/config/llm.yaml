@@ -2,3 +2,8 @@ ollama_phi:
   type: "ollama"
   langchain_config: 
     model: "phi"
+ollama_mistral:
+  type: "ollama"
+  langchain_config: 
+    model: "mistral"
+
