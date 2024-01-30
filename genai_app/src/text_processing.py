@@ -1,7 +1,7 @@
 import os
 import yaml
 from llm import get_llm, get_questions_template
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import JsonOutputParser
 
 # TODO: define what it the correct way to access the config file
 CONFIG_PATH = '/home/oz/projects/gift-card-genai/genai_app/config'
@@ -118,7 +118,8 @@ class QuestionAnswerGenerator:
         The list of answers to the questions
 
     """
-
+    answer_format = '{"answer": <answer>}'
+    
     def __init__(self: str, llm_config: dict):
         """
         Initialize the QuestionAnswerGenerator class.
@@ -131,6 +132,9 @@ class QuestionAnswerGenerator:
 
         Parameters
         ----------
+        recipient_info : str
+            The recipient's info
+        
         questions : list
             The list of questions to ask
 
@@ -139,9 +143,17 @@ class QuestionAnswerGenerator:
         list
             The list of answers to the questions
         """
-        prompt = get_questions_template()
-        chain = prompt | self.llm | StrOutputParser()
+        chain = self.llm | JsonOutputParser()
         for i, question in enumerate(questions['questions']):
-            answer = chain.invoke({'recipient_info': recipient_info, 'question': question})
-            questions['questions'][i]['answer'] = answer
+            messages = get_questions_template( recipient_info=recipient_info,
+                                               question=question['question'],
+                                               answer_format=self.answer_format)
+            answer = chain.invoke(messages)['answer']
+            answer = ', '.join(answer) if isinstance(answer, list) else answer
+            if answer == 'Not sure':
+                answer = question.get('placeholder', None)
+            question['answer'] = answer
+            # drop the placeholder answers:
+            question.pop('placeholder')
+            questions['questions'][i] = question
         return questions

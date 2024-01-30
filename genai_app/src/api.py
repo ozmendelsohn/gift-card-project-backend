@@ -33,20 +33,14 @@ class EmailContent(BaseModel):
 async def post_info(recipient_info: RecipientInfo):
     # Get what is the type of card to generate
     card_type = CardTypeLabeler().label_card_type(recipient_info.recipient_info)
-    # Get the questions to ask # TODO: define what it the correct way to access the config file
+    # Get the questions to ask 
     questions = QuestionRetriver().retrieve_questions(card_type)
-    # Generate the answers
+    # Generate the answers # TODO: define what it the correct way to access the config file
     llm_config = yaml.safe_load(open(os.path.join(CONFIG_PATH, 'llm.yaml')))
-    questions_answers_generator = QuestionAnswerGenerator(llm_config['ollama_phi'])
-    questions_answers = questions_answers_generator.generate_answers(questions, recipient_info.recipient_info)
-    
-    # This function would typically interact with a service or database
-    # questions_answers = [  # Example response
-    #     {"question": "What is your connection?", "answer": "Friend", "placeholder": "Friend"},
-    #     {"question": "What is the recipient's hobbies?", "answer": "Hiking", "placeholder": "Not sure"},
-    #     {"question": "Tell a funny and light-hearted story about the recipient.", "answer": "He is a funny guy.", "placeholder": "Suprise me"},
-    # ]
-    return questions_answers
+    questions_answers_generator = QuestionAnswerGenerator(llm_config['ollama_mistral'])
+    questions_answers = questions_answers_generator.generate_answers(questions=questions, 
+                                                                     recipient_info = recipient_info.recipient_info)
+    return questions_answers['questions']
 
 
 # Screen 2 Endpoints
