@@ -42,11 +42,7 @@ generic_occasion:
   questions:
     - question: "What is your relationship with the recipient? (e.g., Family member, Colleague)"
       placeholder: null
-    - question: "Describe a quality or trait you admire in the recipient. (e.g., Generosity, Humor)"
-      placeholder: "Surprise me"
     - question: "What kind of activities or hobbies does the recipient enjoy? (e.g., Cooking, Hiking)"
-      placeholder: "Surprise me"
-    - question: "Is there a special message or sentiment you wish to convey? (e.g., Congratulations, Thank you)"
       placeholder: "Surprise me"
     - question: "Share a memorable experience or moment you've had with the recipient. (e.g., A surprise party)"
       placeholder: "Surprise me"
