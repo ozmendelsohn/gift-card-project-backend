@@ -1,10 +1,14 @@
 import os
-import yaml
-from llm import get_llm, get_questions_template
+from utils import load_config
+from llm import (get_llm, get_questions_template, get_email_content_template, 
+                 get_email_title_template, get_email_image_prompt_template)
 from langchain_core.output_parsers import JsonOutputParser
+import json
+import requests
+
 
 # TODO: define what it the correct way to access the config file
-CONFIG_PATH = '/home/oz/projects/gift-card-genai/genai_app/config'
+QUESTION_CONFIG = 'questions'
 
 
 class CardTypeLabeler:
@@ -31,9 +35,8 @@ class CardTypeLabeler:
         dict
             The config file containing the available card types and their corresponding keywords
         """
-        with open(os.path.join(CONFIG_PATH, 'questions.yaml')) as f:
-            config = yaml.safe_load(f)
-        return config
+   
+        return load_config(QUESTION_CONFIG)
 
     def label_card_type(self, recipient_info: str) -> str:
         """
@@ -79,9 +82,7 @@ class QuestionRetriver:
         dict
             The config file containing the available card types and their corresponding keywords
         """
-        with open(os.path.join(CONFIG_PATH, 'questions.yaml')) as f:
-            config = yaml.safe_load(f)
-        return config
+        return load_config(QUESTION_CONFIG)
 
     def retrieve_questions(self, card_type: str) -> list:
         """
@@ -98,7 +99,7 @@ class QuestionRetriver:
             The list of questions to ask
         """
         self.config = self.load_questions()
-        return self.config[card_type]
+        return self.config[card_type]['questions']
 
 # Create QuestionAnswerGenerator class
 # This class is used to generate the answers to the questions based on the recipient_info and the questions
@@ -144,16 +145,132 @@ class QuestionAnswerGenerator:
             The list of answers to the questions
         """
         chain = self.llm | JsonOutputParser()
-        for i, question in enumerate(questions['questions']):
+        for i, question in enumerate(questions):
             messages = get_questions_template( recipient_info=recipient_info,
                                                question=question['question'],
                                                answer_format=self.answer_format)
             answer = chain.invoke(messages)['answer']
             answer = ', '.join(answer) if isinstance(answer, list) else answer
-            if answer == 'Not sure':
+            if answer == '':
                 answer = question.get('placeholder', None)
-            question['answer'] = answer
-            # drop the placeholder answers:
-            question.pop('placeholder')
-            questions['questions'][i] = question
+            questions[i]['answer'] = answer
+        
+        # drop the placeholder key
+        questions = [ {k: v for k, v in q.items() if k != 'placeholder'} for q in questions]
         return questions
+    
+# Create EmailComposer class
+# This class is used to compose the email content and image based on the refined input from the user
+class EmailComposer:
+    """
+    This class is used to compose the email content and image based on the refined input from the user.
+
+    Attributes
+    ----------
+    llm : str
+        The LLM model
+    email_title : str
+        The title of the email
+    email_content : str
+        The content of the email
+    email_image : str
+        The image of the email
+
+    """
+    def __init__(self: str, llm_config: dict):
+        """
+        Initialize the EmailComposer class.
+        """
+        self.llm = get_llm(llm_config)
+
+    def compose_email(self, refined_input: list) -> str:
+        """
+        Compose the email content based on the refined input from the user.
+
+        Parameters
+        ----------
+        refined_input : list
+            The refined input from the user
+
+        Returns
+        -------
+        str
+            The content of the email
+        """
+        chain = self.llm
+        messages = get_email_content_template(refined_input)
+        email_content = chain.invoke(messages).content
+        return email_content
+    
+    def compose_email_title(self, email_content: str) -> str:
+        """
+        Compose the title of the email based on the content of the email.
+
+        Parameters
+        ----------
+        email_content : str
+            The content of the email
+
+        Returns
+        -------
+        str
+            The title of the email
+        """
+        chain = self.llm
+        messages = get_email_title_template(email_content)
+        email_title = chain.invoke(messages).content
+        return email_title
+    
+    def compose_email_image_prompt(self, email_content: str) -> str:
+        """
+        Compose the image prompt of the email based on the content of the email.
+
+        Parameters
+        ----------
+        email_content : str
+            The content of the email
+
+        Returns
+        -------
+        str
+            The image prompt of the email
+        """
+        chain = self.llm
+        messages = get_email_image_prompt_template(email_content)
+        email_image_prompt = chain.invoke(messages).content
+        return email_image_prompt
+    
+    def generate_image(self, email_image_prompt: str) -> str:
+        """
+        Generate the image of the email based on the image prompt.
+
+        Parameters
+        ----------
+        email_image_prompt : str
+            The image prompt of the email
+
+        Returns
+        -------
+        str
+            The image of the email
+        """
+        # %%
+        url = "https://api.openai.com/v1/images/generations"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {json.load(open('../secrets.json'))['openai_api_key']}"
+        }
+        data = {
+            "model": "dall-e-3",
+            "prompt": email_image_prompt,
+            "response_format": "b64_json",
+            "n": 1,
+            "size": "1024x1024"
+        }
+
+        response = requests.post(url, headers=headers, json=data)
+        base64_image_data = response.json()['data'][0]['b64_json']
+        
+        return base64_image_data
+    
+    
