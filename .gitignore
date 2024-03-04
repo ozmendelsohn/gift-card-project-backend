@@ -2,3 +2,4 @@
 .vscode/launch.json
 secrets.json
 */**/*.cpython-311.pyc
+genai_app/dev/*
