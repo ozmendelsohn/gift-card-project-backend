@@ -2,7 +2,7 @@ import os
 from utils import load_config
 from llm import (get_llm, get_questions_template, get_email_content_template, 
                  get_email_title_template, get_email_image_prompt_template)
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 import json
 import requests
 
@@ -144,12 +144,12 @@ class QuestionAnswerGenerator:
         list
             The list of answers to the questions
         """
-        chain = self.llm | JsonOutputParser()
+        chain = self.llm | StrOutputParser()
         for i, question in enumerate(questions):
             messages = get_questions_template( recipient_info=recipient_info,
                                                question=question['question'],
                                                answer_format=self.answer_format)
-            answer = chain.invoke(messages)['answer']
+            answer = chain.invoke(messages)
             answer = ', '.join(answer) if isinstance(answer, list) else answer
             if answer == '':
                 answer = question.get('placeholder', None)

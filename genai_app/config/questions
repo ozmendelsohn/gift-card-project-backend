@@ -46,3 +46,5 @@ generic_occasion:
       placeholder: "Surprise me"
     - question: "Share a memorable experience or moment you've had with the recipient. (e.g., A surprise party)"
       placeholder: "Surprise me"
+    - question: "What is the occasion or reason for the gift? (e.g., Birthday, Anniversary)"
+      placeholder: "Surprise me"

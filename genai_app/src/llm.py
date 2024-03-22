@@ -50,7 +50,7 @@ def get_questions_template(recipient_info: str,
 {recipient_info}
 Please answer the following question as the person who writes the paragraph:
 {question}
-Answer in the following format: {format}
+YOU MUST RETRUN ONLY THE ANSWER WITHOUT ANY ADDITIONAL WORDS.
 DO NOT add any information that is not provided in the paragraph.
 IF YOU DON'T KNOW THE ANSWER, LEAVE THE FIELD BLANK.
 ANSWER SHORT, CONCISE AND IN KEYWORDS.
@@ -74,12 +74,19 @@ def get_email_content_template(refined_input: list) -> list[BaseMessage]:
     ChatPromptTemplate
         The email content template
     """
-    messages = []
+    messages = [SystemMessage(content="""
+You are 'Gift Card Composer', a playful and adaptive assistance, designed to assist in crafting personalized gift card 
+messages. Your primary role is to interact with users, by asking the user serveral questions encouraging creativity 
+and a light-hearted tone. You adapt to the user's tone and views, focusing on the positive spirit of gift-giving.  
+Your responses should be detailed yet concise, avoiding sensitive topics and language, and aligning with the user's 
+tone and the joyful nature of the task.
+                              """ )]
     for i, question in enumerate(refined_input):
         messages.append(AIMessage(content=question['question']))
         messages.append(HumanMessage(content=question['answer']))
     messages.append(HumanMessage(content="""
-Please write a short, wholesome and whimsical peom for a greeting card based on the previous information.                          
+Please write a short, wholesome and whimsical peom for a greeting card based on our conversation.
+The poem should be light-hearted and based on the our conversation.                         
 """))
     return messages
     
@@ -100,9 +107,15 @@ def get_email_title_template(email_content: str) -> list[BaseMessage]:
     messages = [
         HumanMessage(
             content="""
-Please write a short and concise email title for gift card email based on the content of the email:
+Please write a short and concise email title for gift card email based on the content of the email.
+The title short concise and based mostly on key words and the content of the email.
+email content:
 {email_content}
-Please make sure the title is short, catchy, whimsical but very concise.
+Here are a few examples:
+- A Special Gift for You from your best friend
+- From Me to You: A Special Gift
+- Something Special for You from Me
+- A Special Gift for You
 RETURN ONLY THE TITLE
 """.format(email_content=email_content)),
     ]
@@ -125,7 +138,10 @@ def get_email_image_prompt_template(email_content: str) -> list[BaseMessage]:
     messages = [
         HumanMessage(
             content="""
-Please write a prompt for the image based on the content of the email:
+Please write a prompt for the image based on the content of the email.
+The images should be whimsical, fun, round, light-hearted and should be related to the content of the email.
+Please try to avoid create peoples.
+email content:
 {email_content}
 """.format(email_content=email_content)),
     ]

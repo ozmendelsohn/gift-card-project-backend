@@ -7,7 +7,7 @@ from utils import load_config
 
 from text_processing import CardTypeLabeler, QuestionRetriver, QuestionAnswerGenerator, EmailComposer
 
-chosen_model = 'groq_mixtral'
+chosen_model = 'groq_llama'
 TRACKING = True
 if TRACKING:
     os.environ["LANGCHAIN_TRACING_V2"] = "true"
