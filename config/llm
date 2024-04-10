@@ -1,0 +1,31 @@
+ollama_phi:
+  type: "ollama"
+  langchain_config: 
+    model: "phi"
+ollama_mistral:
+  type: "ollama"
+  langchain_config: 
+    model: "mistral"
+ollama_mixtral:
+  type: "ollama"
+  langchain_config: 
+    model: "mixtral"
+groq_mixtral:
+  type: "groq"
+  langchain_config:
+    model: "mixtral-8x7b-32768"
+    SECRET__groq_api_key: "groq_api_key"
+groq_llama:
+  type: "groq"
+  langchain_config:
+    model: "llama2-70b-4096"
+    SECRET__groq_api_key: "groq_api_key"
+groq_gemma:
+  type: "groq"
+  langchain_config:
+    model: "gemma-7b-it"
+    SECRET__groq_api_key: "groq_api_key"
+
+    
+    
+
