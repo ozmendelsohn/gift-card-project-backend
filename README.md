@@ -1,5 +1,7 @@
 # Backend Work Plan
 
+![alt text](image.png)
+
 ## Overview
 The backend will support a three-screen web application with multiple API calls and user inputs that culminate in sending an email. It will be built using FastAPI.
 
